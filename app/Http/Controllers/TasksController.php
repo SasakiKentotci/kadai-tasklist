@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Task; 
-
+use app\Models\User;
 class TasksController extends Controller
 {
     /**
@@ -12,13 +12,18 @@ class TasksController extends Controller
      */
     public function index()
     {
-                // タスク一覧を取得
-        $tasks = Task::all();         // 追加
-
-        // タスク一覧ビューでそれを表示
-        return view('tasks.index', [     // 追加
-            'tasks' => $tasks,        // 追加
-        ]);                                 // 追加
+            
+        //タスク一覧を取得
+        $data = [];
+        if (\Auth::check()) {
+            $user = \Auth::user();
+            $tasks = $user->tasks()->orderBy('created_at', 'desc')->paginate(10);
+            $data = [
+                'user' => $user,
+                'tasks' => $tasks,
+            ];
+        }
+        return view('dashboard', $data);
     }
 
     /**
@@ -45,10 +50,10 @@ class TasksController extends Controller
             'content' => 'required|max:255',
         ]);
         // タスクを作成
-        $task = new Task;
-        $task->status = $request->status;    // 追加
-        $task->content = $request->content;
-        $task->save();
+        $request->user()->tasks()->create([
+        "status" => $request->status,    // 追加
+        "content" => $request->content,
+        ]);
 
         // トップページへリダイレクトさせる
         return redirect('/');
@@ -59,12 +64,14 @@ class TasksController extends Controller
      */
     public function show(string $id)
     {
-        // idの値でタスクを検索して取得
+         $user_id = \Auth::user()->id;
+        //タスクをIDで検索
         $task = Task::findOrFail($id);
-
-        // タスク詳細ビューでそれを表示
-        return view('tasks.show', [
-            'task' => $task,
+        if($task->user_id !== $user_id){
+            return redirect('/');
+        }
+        return view("tasks.show", [
+            "task" => $task,
         ]);
     }
 
@@ -98,6 +105,7 @@ class TasksController extends Controller
         // タスクを更新
         $task->status = $request->status;    
         $task->content = $request->content;
+        $task->user_id=$request->user_id;
         $task->save();
 
         // トップページへリダイレクトさせる

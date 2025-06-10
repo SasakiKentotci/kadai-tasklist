@@ -1,22 +1,24 @@
-module.exports = {
-  purge: [],
-  darkMode: false, // or 'media' or 'class'
-  theme: {
-    extend: {},
-  },
-  variants: {
-    extend: {},
-  },
-  plugins: [],
-}
+import defaultTheme from 'tailwindcss/defaultTheme';
+import forms from '@tailwindcss/forms';
+import typography  from '@tailwindcss/typography';  // 追記
+import daisyui from 'daisyui';                      // 追記
+
 /** @type {import('tailwindcss').Config} */
-module.exports = {
-  content: [
-    "./resources/**/*.blade.php",
-    "./resources/**/*.js",
-  ],
-  theme: {
-    extend: {},
-  },
-  plugins: [require("@tailwindcss/typography"), require("daisyui")],
-}
+export default {
+    content: [
+        './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
+        './storage/framework/views/*.php',
+        './resources/views/**/*.blade.php',
+    ],
+
+    theme: {
+        extend: {
+            fontFamily: {
+                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+            },
+        },
+    },
+
+    plugins: [forms],
+    plugins: [typography, daisyui],     // 追記
+};

@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TasksController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +14,15 @@ use App\Http\Controllers\TasksController;
 |
 */
 
-
 Route::get('/', [TasksController::class, 'index']);
-Route::resource('tasks', TasksController::class);
+
+Route::get('/dashboard', [TasksController::class, 'index'])->middleware(['auth'])->name('dashboard');
+
+Route::middleware('auth')->group(function () {
+    Route::resource('tasks', TasksController::class, ['only' => ['index', 'show','create','edit','store','update','destroy']]);
+    // Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    // Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    // Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+require __DIR__.'/auth.php';
